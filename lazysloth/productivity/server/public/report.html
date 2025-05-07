@@ -1,0 +1,64 @@
+
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lazy Sloth - My Reports</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    
+<body>
+
+    <header>
+        <img class="custom-img" src="{% static 'img/1.png' %}" alt="Lazy Sloth Logo">
+        <h1>My Reports</h1>
+    </header>
+
+    <nav>
+        <a href="/">Home</a>
+        <a href="/concentrate_now/">Concentrate Now</a>
+        <a href="/my_goals/">View My Goals</a>
+        <a href="/report/" class="active">My Reports</a>
+    </nav>
+
+    <div class="container">
+        <h2>Total Work Time Today: <span id="work_time_today">00:00:00</span></h2>
+        <h2>Total Break Time Today: <span id="break_time_today">00:00:00</span></h2>
+
+        <h2>Total Work Time This Week: <span id="work_time_week">00:00:00</span></h2>
+        <h2>Total Break Time This Week: <span id="break_time_week">00:00:00</span></h2>
+
+        <h2>Total Work Time This Month: <span id="work_time_month">00:00:00</span></h2>
+        <h2>Total Break Time This Month: <span id="break_time_month">00:00:00</span></h2>
+    </div>
+
+    <script>
+        // Function to format time as HH:MM:SS
+        function formatTime(seconds) {
+            let hrs = Math.floor(seconds / 3600); // Calculate hours
+            let mins = Math.floor((seconds % 3600) / 60); // Calculate minutes
+            let secs = seconds % 60; // Calculate seconds
+            return `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        // Load stored times from localStorage (if any)
+        let workTimeToday = parseInt(localStorage.getItem('workTimeToday')) || 0;
+        let breakTimeToday = parseInt(localStorage.getItem('breakTimeToday')) || 0;
+        let workTimeWeek = parseInt(localStorage.getItem('workTimeWeek')) || 0;
+        let breakTimeWeek = parseInt(localStorage.getItem('breakTimeWeek')) || 0;
+        let workTimeMonth = parseInt(localStorage.getItem('workTimeMonth')) || 0;
+        let breakTimeMonth = parseInt(localStorage.getItem('breakTimeMonth')) || 0;
+
+        // Update the displayed times when the page loads
+        document.addEventListener("DOMContentLoaded", function () {
+            document.getElementById("work_time_today").innerHTML = formatTime(workTimeToday);
+            document.getElementById("break_time_today").innerHTML = formatTime(breakTimeToday);
+            document.getElementById("work_time_week").innerHTML = formatTime(workTimeWeek);
+            document.getElementById("break_time_week").innerHTML = formatTime(breakTimeWeek);
+            document.getElementById("work_time_month").innerHTML = formatTime(workTimeMonth);
+            document.getElementById("break_time_month").innerHTML = formatTime(breakTimeMonth);
+        });
+    </script>
+
+</body>
+</html>

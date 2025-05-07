@@ -1,0 +1,34 @@
+
+{% load static %}
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Lazy Sloth</title>
+        <link rel="stylesheet" href="{% static 'css/style.css' %}">
+        <script src="{% static 'js/timer.js' %}" defer></script>
+    </head>
+    
+    <body>
+        <header>
+            <img class="custom-img" src="{% static 'img/1.png' %}" alt="Lazy Sloth Logo">
+            <h1>Lazy Sloth</h1>
+        </header>
+
+        <nav>
+            <a href="/" class="active">Home</a>
+            <a href="/concentrate_now/">Concentrate Now</a>
+            <a href="/my_goals/">View My Goals</a>
+            <a href="/report/">My Reports</a>
+        </nav>
+
+        <div class="container">
+            <button class="sbtn">Begin Focus</button>
+            <p>Welcome to Lazy Sloth, your personal productivity enhancement service. Start focusing now with our tools and boost your productivity!</p>
+        </div>
+
+        <footer>
+            <p>&copy; 2024 Lazy Sloth. All Rights Reserved.</p>
+        </footer>
+    </body>
+</html>

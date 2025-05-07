@@ -1,0 +1,195 @@
+
+{% load static %}
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lazy Sloth</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+   
+</head>
+
+<body>
+    <header>
+        <header>
+            <img class="custom-img" src="{% static 'img/1.png' %}" alt="Lazy Sloth Logo">
+            <h1>Lazy Sloth</h1>
+        </header>
+    </header>
+
+    <nav>
+        <a href="/" class="active">Home</a>
+        <a href="/concentrate_now/">Concentrate Now</a>
+        <a href="/my_goals/">View My Goals</a>
+        <a href="/report/">My Reports</a>
+    </nav>
+    <h1>Pomodoro Timer with Work/Break Tracker</h1>
+    
+    <div class="input-group">
+        <label for="hours_input">Hours:</label>
+        <input type="number" id="hours_input" min="0" value="0">
+        <label for="minutes_input">Minutes:</label>
+        <input type="number" id="minutes_input" min="0" value="0">
+        <button class="sbtn" onclick="setTotalTime()">Set Total Time</button>
+    </div>
+
+    <h2>Total Timer: <span id="timer_display">00:00:00</span></h2>
+    <h2>Concentrate Timer: <span id="concentrate_timer_display">00:00:00</span></h2>
+    <h2>Break Timer: <span id="break_timer_display">00:00:00</span></h2>
+
+    <div class="input-group">
+        <button onclick="startConcentrateTimer()">Start Concentrate Timer</button>
+        <button onclick="startBreakTimer()">Start Break Timer</button>
+        <button onclick="stopTimer()">Stop The Timer</button>
+        <button onclick="saveDailyTimes()">Save Daily Times</button>
+    </div>
+
+    <script>
+        let countdown = null; // Reference to the current running timer
+        let totalSeconds = 0; // Total time in seconds
+        let concentrateElapsed = 0; // Concentrate time elapsed (forwards)
+        let breakElapsed = 0; // Break time elapsed (forwards)
+
+        // Load stored times from localStorage (if any)
+        let workTimeToday = parseInt(localStorage.getItem('workTimeToday')) || 0;
+        let breakTimeToday = parseInt(localStorage.getItem('breakTimeToday')) || 0;
+        let workTimeWeek = parseInt(localStorage.getItem('workTimeWeek')) || 0;
+        let breakTimeWeek = parseInt(localStorage.getItem('breakTimeWeek')) || 0;
+        let workTimeMonth = parseInt(localStorage.getItem('workTimeMonth')) || 0;
+        let breakTimeMonth = parseInt(localStorage.getItem('breakTimeMonth')) || 0;
+
+        // Get the current date to check week/month resets
+        let currentDate = new Date();
+        let savedWeek = parseInt(localStorage.getItem('savedWeek')) || currentDate.getWeek();
+        let savedMonth = parseInt(localStorage.getItem('savedMonth')) || currentDate.getMonth();
+
+        // Reset week and month data if a new week/month has started
+        if (currentDate.getWeek() !== savedWeek) {
+            workTimeWeek = 0;
+            breakTimeWeek = 0;
+            localStorage.setItem('savedWeek', currentDate.getWeek());
+        }
+
+        if (currentDate.getMonth() !== savedMonth) {
+            workTimeMonth = 0;
+            breakTimeMonth = 0;
+            localStorage.setItem('savedMonth', currentDate.getMonth());
+        }
+
+        // Update the displayed times when the page loads
+        document.addEventListener("DOMContentLoaded", function () {
+            document.getElementById("work_time_today").innerHTML = formatTime(workTimeToday);
+            document.getElementById("break_time_today").innerHTML = formatTime(breakTimeToday);
+            document.getElementById("work_time_week").innerHTML = formatTime(workTimeWeek);
+            document.getElementById("break_time_week").innerHTML = formatTime(breakTimeWeek);
+            document.getElementById("work_time_month").innerHTML = formatTime(workTimeMonth);
+            document.getElementById("break_time_month").innerHTML = formatTime(breakTimeMonth);
+        });
+
+        // Function to set total time based on user input
+        function setTotalTime() {
+            let hours = parseInt(document.getElementById("hours_input").value) || 0; // Get the entered hours or default to 0
+            let minutes = parseInt(document.getElementById("minutes_input").value) || 0; // Get the entered minutes or default to 0
+            totalSeconds = (hours * 3600) + (minutes * 60); // Convert total time to seconds
+            document.getElementById("timer_display").innerHTML = formatTime(totalSeconds); // Display the total time
+        }
+
+        // Function to format time as HH:MM:SS
+        function formatTime(seconds) {
+            let hrs = Math.floor(seconds / 3600); // Calculate hours
+            let mins = Math.floor((seconds % 3600) / 60); // Calculate minutes
+            let secs = seconds % 60; // Calculate seconds
+            return `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        // Function to start the concentrate timer (counts forward) and update total timer (counts down)
+        function startConcentrateTimer() {
+            if (countdown !== null) clearInterval(countdown); // Clear any running timer
+
+            countdown = setInterval(function () {
+                if (totalSeconds > 0) {
+                    concentrateElapsed++; // Increase concentrate time (forwards)
+                    totalSeconds--; // Decrease total time (backwards)
+
+                    document.getElementById("timer_display").innerHTML = formatTime(totalSeconds); // Update total timer display
+                    document.getElementById("concentrate_timer_display").innerHTML = formatTime(concentrateElapsed); // Update concentrate timer display
+                } else {
+                    clearInterval(countdown); // Stop the timer when time runs out
+                    alert("Total time's up!");
+                }
+            }, 1000); // Run every second
+        }
+
+        // Function to start the break timer (counts forward) and update total timer (counts down)
+        function startBreakTimer() {
+            if (countdown !== null) clearInterval(countdown); // Clear any running timer
+
+            countdown = setInterval(function () {
+                if (totalSeconds > 0) {
+                    breakElapsed++; // Increase break time (forwards)
+                    totalSeconds--; // Decrease total time (backwards)
+
+                    document.getElementById("timer_display").innerHTML = formatTime(totalSeconds); // Update total timer display
+                    document.getElementById("break_timer_display").innerHTML = formatTime(breakElapsed); // Update break timer display
+                    
+                } else {
+                    clearInterval(countdown); // Stop the timer when time runs out
+                    alert("Total time's up!");
+                }
+            }, 1000); // Run every second
+        }
+
+        // Function to save daily, weekly, and monthly work and break times
+        function saveDailyTimes() {
+            // Add today's concentrate and break time to the previously stored times
+            workTimeToday += concentrateElapsed;
+            breakTimeToday += breakElapsed;
+
+            workTimeWeek += concentrateElapsed;
+            breakTimeWeek += breakElapsed;
+
+            workTimeMonth += concentrateElapsed;
+            breakTimeMonth += breakElapsed;
+
+            // Save the updated times in localStorage
+            localStorage.setItem('workTimeToday', workTimeToday);
+            localStorage.setItem('breakTimeToday', breakTimeToday);
+
+            localStorage.setItem('workTimeWeek', workTimeWeek);
+            localStorage.setItem('breakTimeWeek', breakTimeWeek);
+
+            localStorage.setItem('workTimeMonth', workTimeMonth);
+            localStorage.setItem('breakTimeMonth', breakTimeMonth);
+
+            // Update the displayed times
+            document.getElementById("work_time_today").innerHTML = formatTime(workTimeToday);
+            document.getElementById("break_time_today").innerHTML = formatTime(breakTimeToday);
+            document.getElementById("work_time_week").innerHTML = formatTime(workTimeWeek);
+            document.getElementById("break_time_week").innerHTML = formatTime(breakTimeWeek);
+            document.getElementById("work_time_month").innerHTML = formatTime(workTimeMonth);
+            document.getElementById("break_time_month").innerHTML = formatTime(breakTimeMonth);
+
+            // Reset the session timers
+            concentrateElapsed = 0;
+            breakElapsed = 0;
+        }
+        // Function to stop the currently running timer
+        function stopTimer() {
+            if (countdown !== null) {
+                clearInterval(countdown); // Clear the running timer
+                countdown = null; // Reset the countdown reference
+                alert("Timer stopped!");
+    }
+}
+
+
+        // Helper functions to get the current week number
+        Date.prototype.getWeek = function () {
+            let firstDayOfYear = new Date(this.getFullYear(), 0, 1);
+            let pastDaysOfYear = (this - firstDayOfYear) / 86400000;
+            return Math.ceil((pastDaysOfYear + firstDayOfYear.getDay() + 1) / 7);
+        };
+    </script>
+
+</body>
